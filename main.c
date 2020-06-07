@@ -20,6 +20,7 @@ int checkURI(char* str);
 regmatch_t* extract(char* in);
 char* get(char* in, regmatch_t *pmatch, int index);
 char* getDefaultPort(char* procotol);
+void writeResponse(char* data[], int length);
 
 int main() {
     // Read from stdin
@@ -48,6 +49,16 @@ int main() {
             printf("Port: %s\n", strlen(port) != 0 ? port : getDefaultPort(protocol));
             printf("Chemin: %s\n", strlen(chemin) != 0 ? chemin : "/");
             printf("Ressource: %s\n", strlen(ressource) != 0 ? ressource : "?");
+
+            char* data[5];
+            data[0] = protocol;
+            data[1] = domain;
+            data[2] = strlen(port) != 0 ? port : getDefaultPort(protocol);
+            data[3] = strlen(chemin) != 0 ? chemin : "/";
+            data[4] = strlen(ressource) != 0 ? ressource : "?";
+            writeResponse(data, 5);
+
+            printf("Données enregistrées dans le fichier response.txt\n");
         } else if (protocol[0] == 's') {
             char* user = get(buffer, reg, 3);
             char* domain = get(buffer, reg, 4);
@@ -66,6 +77,15 @@ int main() {
             printf("User: %s\n", strlen(user) != 0 ? user : "root");
             printf("Domain: %s\n", domain);
             printf("Port: %s\n", strlen(port) != 0 ? port : getDefaultPort(protocol));
+
+            char* data[4];
+            data[0] = protocol;
+            data[1] = strlen(user) != 0 ? user : "root";
+            data[2] = domain;
+            data[3] = strlen(port) != 0 ? port : getDefaultPort(protocol);
+            writeResponse(data, 4);
+
+            printf("Données enregistrées dans le fichier response.txt\n");
         } else if (protocol[0] == 'f') {
             char* user = get(buffer, reg, 3);
             char* domain = get(buffer, reg, 4);
@@ -85,6 +105,16 @@ int main() {
             printf("Domain: %s\n", domain);
             printf("Port: %s\n", strlen(port) != 0 ? port : getDefaultPort(protocol));
             printf("Path: %s\n", strlen(path) != 0 ? path : "/");
+
+            char* data[5];
+            data[0] = protocol;
+            data[1] = strlen(user) != 0 ? user : "root";
+            data[2] = domain;
+            data[3] = strlen(port) != 0 ? port : getDefaultPort(protocol);
+            data[4] = strlen(path) != 0 ? path : "/";
+            writeResponse(data, 5);
+            
+            printf("Données enregistrées dans le fichier response.txt\n");
         } else if (protocol[0] == 'g') {
             char* domain = get(buffer, reg, 4);
             char* chemin = get(buffer, reg, 8);
@@ -109,6 +139,14 @@ int main() {
             printf("Protocol: %s\n", protocol);
             printf("Domain: %s\n", domain);
             printf("Chemin: %s\n", chemin);
+
+            char* data[3];
+            data[0] = protocol;
+            data[1] = domain;
+            data[2] = chemin;
+            writeResponse(data, 3);
+            
+            printf("Données enregistrées dans le fichier response.txt\n");
         }
     }
     else {
@@ -177,4 +215,19 @@ char* getDefaultPort(char* procotol) {
     } else if (procotol[0] == 's') return "22";
     else if (procotol[0] == 'f') return "21";
     return "0";
+}
+
+void writeResponse(char* data[], int length) {
+    FILE* fic;
+    int i;
+    fic = fopen("response.txt", "w");
+
+    if (fic == NULL) {
+        printf("Impossible d'ouvrir en écriture le fichier \"response.txt\"\n"); 
+    } else {
+        for (i = 0; i < length; i++) {
+            fprintf(fic, "%s\n", data[i]);
+        }
+        fclose(fic);
+    }
 }
